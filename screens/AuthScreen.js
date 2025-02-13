@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-nativ
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_URL = 'http://10.0.0.75:3000';
+const API_URL = 'http://10.0.0.75:3000'; // 10.64.32.147 your IP address for the device where your backend server is running
 
-const AuthScreen = () => {
+const AuthScreen = ({ onLoginStatusChange }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -16,6 +16,9 @@ const AuthScreen = () => {
     const storeToken = async (token) => {
         try {
             await AsyncStorage.setItem('authToken', token);
+            onLoginStatusChange(true); // Inform App.js that user is logged in
+            console.log('token stored in Async');
+
         } catch (error) {
             console.error('Error storing token', error);
         }
@@ -27,17 +30,15 @@ const AuthScreen = () => {
         setPassword('');
     };
 
-    // Handle Signup or Login
     const onSubmitHandler = async () => {
         try {
             const endpoint = isLogin ? 'login' : 'signup';
             const response = await axios.post(`${API_URL}/${endpoint}`, { email, password });
-
+    
             if (response.status === 200 || response.status === 201) {
                 if (isLogin) {
                     await storeToken(response.data.token);
                 } else {
-                    // If it's a signup, reset the form after successful signup
                     resetFields();
                 }
                 setIsError(false);
@@ -48,6 +49,7 @@ const AuthScreen = () => {
             setMessage(error.response?.data?.message || 'Error processing request');
         }
     };
+    
 
     return (
         <View style={styles.card}>
@@ -80,7 +82,7 @@ const AuthScreen = () => {
 };
 const styles = StyleSheet.create({
     card: { 
-        flex: 1, backgroundColor: '#ebebeb', width: '80%', marginTop: '30%', marginBottom: '30%', borderRadius: 20, 
+        flex: 1, backgroundColor: '#ebebeb', marginTop: '30%', marginBottom: '30%', borderRadius: 20, justifyContent: 'center'
     },
     heading: { 
         fontSize: 30, fontWeight: 'bold', color: 'black', marginLeft: '10%', marginTop: '10%', paddingBottom: '5%'    
