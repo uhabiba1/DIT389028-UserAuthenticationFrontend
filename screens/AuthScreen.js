@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-nativ
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_URL = 'http://10.0.0.75:3000';
+const API_URL = 'http://10.0.0.75:3000'; // 10.64.32.147 or  10.0.0.75
 
 const AuthScreen = () => {
     const [email, setEmail] = useState('');
@@ -32,10 +32,11 @@ const AuthScreen = () => {
         try {
             const endpoint = isLogin ? 'login' : 'signup';
             const response = await axios.post(`${API_URL}/${endpoint}`, { email, password });
-
+            
             if (response.status === 200 || response.status === 201) {
                 if (isLogin) {
                     await storeToken(response.data.token);
+                    
                 } else {
                     // If it's a signup, reset the form after successful signup
                     resetFields();
@@ -45,6 +46,7 @@ const AuthScreen = () => {
             }
         } catch (error) {
             setIsError(true);
+            resetFields(); // If it's a signup, reset the form after successful signup
             setMessage(error.response?.data?.message || 'Error processing request');
         }
     };
